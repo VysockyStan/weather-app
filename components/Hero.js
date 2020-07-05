@@ -6,7 +6,6 @@ import Paper from '@material-ui/core/Paper';
 const useStyles = makeStyles(() => ({
   hero: {
     padding: 32,
-    width: '60%',
   },
 }));
 
