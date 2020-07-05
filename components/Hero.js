@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core';
+import Paper from '@material-ui/core/Paper';
 
 const useStyles = makeStyles(() => ({
   hero: {
     padding: 32,
     width: '60%',
-    backgroundColor: '#2196f312'
   },
 }));
 
@@ -14,9 +14,9 @@ const Hero = ({ children }) => {
   const classes = useStyles();
 
   return (
-    <div className={classes.hero}>
+    <Paper className={classes.hero}>
       {children}
-    </div>
+    </Paper>
   );
 };
 
