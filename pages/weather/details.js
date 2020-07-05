@@ -1,10 +1,9 @@
+import React, { useState } from 'react';
 import FormControl from '@material-ui/core/FormControl';
 import IconButton from '@material-ui/core/IconButton';
 import Input from '@material-ui/core/Input';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import InputLabel from '@material-ui/core/InputLabel';
-import React, {useState} from 'react';
-import { getWeatherData } from '../../lib/weather'
 import Container from '@material-ui/core/Container';
 import { makeStyles } from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
@@ -12,18 +11,26 @@ import Typography from '@material-ui/core/Typography';
 import SearchIcon from '@material-ui/icons/Search';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 
+import Accordion from '@material-ui/core/Accordion';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Pagination from '@material-ui/lab/Pagination';
+
+import { getWeatherData } from '../../lib/weather'
 import DatePicker from '../../components/DatePicker'
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   weatherInfoWrapper: {
     margin: '32px 0',
-    padding: 24
+    padding: theme.spacing(3),
   },
   header: {
     position: 'sticky',
     top: 0,
+    zIndex: 1,
     backgroundColor: '#fff',
-    padding: 24
+    padding: theme.spacing(3),
   },
   cleanFilterIcon: {
     cursor: 'pointer'
@@ -32,6 +39,9 @@ const useStyles = makeStyles(() => ({
     display: 'flex',
     alignItems: 'flex-end',
     justifyContent: 'space-between'
+  },
+  pagination: {
+    marginTop: theme.spacing(2),
   }
 }));
 
@@ -48,6 +58,21 @@ export async function getStaticProps() {
 const Details = ({ weather }) => {
   const classes = useStyles();
   const [filters, setFilters] = useState({ station: '', date: new Date('2014-09-01') });
+  const [expanded, setExpanded] = useState(false);
+
+  const itemsPerPage = 15;
+  const [page, setPage] = useState(1);
+  const [pagesAmount] = useState(
+    Math.ceil(weather.length / itemsPerPage)
+  );
+
+  const handlePaginate = (event, value) => {
+    setPage(value);
+  };
+
+  const handleExpandChange = panel => (event, isExpanded) => {
+    setExpanded(isExpanded ? panel : false);
+  };
 
   const handleSelectChange = (e) => {
     const { name, value } = e.target;
@@ -60,7 +85,7 @@ const Details = ({ weather }) => {
     })
   };
 
-  const handleDateSelect = (value) => () => {
+  const handleDateSelect = (value) => {
     setFilters(prevState => {
       return {
         ...prevState,
@@ -79,6 +104,9 @@ const Details = ({ weather }) => {
   };
 
   const { station, date } = filters;
+  const paginatedData = weather.filter((item, index) => {
+    return index > (page - 1) * itemsPerPage && index < page * itemsPerPage
+  });
 
   return (
     <Container maxWidth="md">
@@ -89,7 +117,7 @@ const Details = ({ weather }) => {
             Weather in Netherlands
           </Typography>
 
-          <div>
+          <div className={classes.filters}>
             <FormControl>
               <InputLabel htmlFor="station-search">Search by station name</InputLabel>
               <Input
@@ -116,13 +144,40 @@ const Details = ({ weather }) => {
           </div>
         </div>
 
-        {weather.map(item => (
-          <div key={item.id}>{item.place_name}</div>
+        {paginatedData.map(item => (
+          <Accordion key={item.id} expanded={expanded === item.id} onChange={handleExpandChange(item.id)}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1bh-content"
+              id="panel1bh-header"
+            >
+              <Typography>{item.place_name}</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography>
+                Nulla facilisi. Phasellus sollicitudin nulla et quam mattis feugiat. Aliquam eget
+                maximus est, id dignissim quam.
+              </Typography>
+            </AccordionDetails>
+          </Accordion>
         ))}
+
+        <div className={classes.pagination}>
+          <Pagination
+            count={pagesAmount}
+            page={page}
+            onChange={handlePaginate}
+            defaultPage={1}
+            color="primary"
+            size="large"
+            showFirstButton
+            showLastButton
+          />
+        </div>
       </Paper>
     </Container>
   )
 };
 
 
-export default Details
+export default Details;

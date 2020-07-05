@@ -21,7 +21,7 @@ const DatePicker = ({ handleDateChange, selectedDate }) => {
 
 DatePicker.propTypes = {
   handleDateChange: PropTypes.func.isRequired,
-  selectedDate: PropTypes.func.isRequired
+  selectedDate: PropTypes.object.isRequired
 };
 
 export default DatePicker;
