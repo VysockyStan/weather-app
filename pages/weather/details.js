@@ -16,9 +16,12 @@ import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Pagination from '@material-ui/lab/Pagination';
+import DateFnsAdapter  from '@date-io/date-fns';
 
 import { getWeatherData } from '../../lib/weather'
 import DatePicker from '../../components/DatePicker'
+
+const dateFns = new DateFnsAdapter();
 
 const useStyles = makeStyles((theme) => ({
   weatherInfoWrapper: {
@@ -31,6 +34,11 @@ const useStyles = makeStyles((theme) => ({
     zIndex: 1,
     backgroundColor: '#fff',
     padding: theme.spacing(3),
+    margin: '0 -24px'
+  },
+  heading: {
+    flexBasis: '33.33%',
+    flexShrink: 0,
   },
   cleanFilterIcon: {
     cursor: 'pointer'
@@ -57,7 +65,7 @@ export async function getStaticProps() {
 
 const Details = ({ weather }) => {
   const classes = useStyles();
-  const [filters, setFilters] = useState({ station: '', date: new Date('2014-09-01') });
+  const [filters, setFilters] = useState({ station: '', date: null });
   const [expanded, setExpanded] = useState(false);
 
   const itemsPerPage = 15;
@@ -68,6 +76,25 @@ const Details = ({ weather }) => {
 
   const handlePaginate = (event, value) => {
     setPage(value);
+  };
+
+  const filterWeather = ({ place_name, datetime }) => {
+    const { station, date } = filters;
+
+    if (station && !place_name.toLowerCase().includes(station.toLowerCase())) return false;
+    if (date && !dateFns.isEqual(date.setHours(0,0,0,0), new Date(datetime))) return false;
+
+    return true;
+  };
+
+  const isFilterSet = () => {
+    const { station, date } = filters;
+
+    return !!station || !!date;
+  };
+
+  const getFilteredWeather = () => {
+    return weather.filter(filterWeather);
   };
 
   const handleExpandChange = panel => (event, isExpanded) => {
@@ -94,7 +121,7 @@ const Details = ({ weather }) => {
     })
   };
 
-  const handleClearSearch = (e) => {
+  const handleClearSearch = () => {
     setFilters(prevState => {
       return {
         ...prevState,
@@ -103,10 +130,20 @@ const Details = ({ weather }) => {
     })
   };
 
-  const { station, date } = filters;
-  const paginatedData = weather.filter((item, index) => {
+  const paginate = (item, index) => {
     return index > (page - 1) * itemsPerPage && index < page * itemsPerPage
-  });
+  };
+
+  const getFormattedDate = (date) => {
+    return dateFns.format(new Date(date), 'MM/dd/yyyy')
+  };
+
+  const getDataToDisplay = () => {
+    if (isFilterSet()) return getFilteredWeather();
+    return weather.filter((paginate));
+  };
+
+  const { station, date } = filters;
 
   return (
     <Container maxWidth="md">
@@ -144,36 +181,55 @@ const Details = ({ weather }) => {
           </div>
         </div>
 
-        {paginatedData.map(item => (
-          <Accordion key={item.id} expanded={expanded === item.id} onChange={handleExpandChange(item.id)}>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel1bh-content"
-              id="panel1bh-header"
-            >
-              <Typography>{item.place_name}</Typography>
+        {getDataToDisplay().map(({
+          id, place_name: placeName, datetime, latitude, longitude,
+          temperature_max: tempMax, temperature_min: tempMin,
+          precipitation_probability: precipProb, precipitation_mm: precipMm
+        }) => (
+          <Accordion key={id} expanded={expanded === id} onChange={handleExpandChange(id)}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography className={classes.heading}>{placeName}</Typography>
+              <Typography className={classes.heading}>{getFormattedDate(datetime)}</Typography>
+              <Typography className={classes.heading}>{tempMax} &#8451; / {tempMin} &#8451;</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <Typography>
-                Nulla facilisi. Phasellus sollicitudin nulla et quam mattis feugiat. Aliquam eget
-                maximus est, id dignissim quam.
-              </Typography>
+              <div>
+                <div><Typography variant="caption">Latitude</Typography></div>
+                <div><Typography variant="subtitle2">{latitude}</Typography></div>
+              </div>
+
+              <div>
+                <div><Typography variant="caption">Longitude</Typography></div>
+                <div><Typography variant="subtitle2">{longitude}</Typography></div>
+              </div>
+              <div>
+                <div><Typography variant="caption">Precipitation probability</Typography></div>
+                <div><Typography variant="subtitle2">{precipProb}</Typography></div>
+              </div>
+              <div>
+                <div><Typography variant="caption">Precipitation mm</Typography></div>
+                <div><Typography variant="subtitle2">{precipMm}</Typography></div>
+              </div>
             </AccordionDetails>
           </Accordion>
         ))}
 
-        <div className={classes.pagination}>
-          <Pagination
-            count={pagesAmount}
-            page={page}
-            onChange={handlePaginate}
-            defaultPage={1}
-            color="primary"
-            size="large"
-            showFirstButton
-            showLastButton
-          />
-        </div>
+        {!isFilterSet()
+          && (
+            <div className={classes.pagination}>
+              <Pagination
+                count={pagesAmount}
+                page={page}
+                onChange={handlePaginate}
+                defaultPage={1}
+                color="primary"
+                size="large"
+                showFirstButton
+                showLastButton
+              />
+            </div>
+          )
+        }
       </Paper>
     </Container>
   )
