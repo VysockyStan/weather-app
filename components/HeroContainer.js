@@ -8,8 +8,8 @@ const useStyles = makeStyles(() => ({
     flexDirection: 'column',
     alignItems: 'flex-end',
     justifyContent: 'center',
-    height: '100vh'
-  }
+    height: '100vh',
+  },
 }));
 
 const HeroContainer = ({ children }) => {
@@ -23,7 +23,7 @@ const HeroContainer = ({ children }) => {
 };
 
 HeroContainer.propTypes = {
-  children: PropTypes.node.isRequired
+  children: PropTypes.node.isRequired,
 };
 
 export default HeroContainer;

@@ -1,9 +1,10 @@
+import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import Container from '@material-ui/core/Container';
 import { makeStyles } from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
 import Pagination from '@material-ui/lab/Pagination';
-import DateFnsAdapter  from '@date-io/date-fns';
+import DateFnsAdapter from '@date-io/date-fns';
 
 import { getWeatherData } from '../../lib/weather';
 import Header from '../../components/WeatherListHeader';
@@ -18,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
   },
   pagination: {
     marginTop: theme.spacing(2),
-  }
+  },
 }));
 
 export async function getStaticProps() {
@@ -26,34 +27,33 @@ export async function getStaticProps() {
 
   return {
     props: {
-      weather
-    }
-  }
+      weather,
+    },
+  };
 }
 
 const Details = ({ weather }) => {
+  const itemsPerPage = 15;
   const classes = useStyles();
   const [filters, setFilters] = useState({ station: '', date: null });
-
-  const itemsPerPage = 15;
   const [page, setPage] = useState(1);
   const [pagesAmount] = useState(
-    Math.ceil(weather.length / itemsPerPage)
+    Math.ceil(weather.length / itemsPerPage),
   );
 
   const handlePaginate = (event, value) => {
     setPage(value);
   };
 
-  const filterWeather = ({ place_name, datetime }) => {
+  const filterWeather = ({ place_name: placeName, datetime }) => {
     const { station, date } = filters;
 
     if (station) {
-      if (!place_name.toLowerCase().includes(station.toLowerCase())) return false;
+      if (!placeName.toLowerCase().includes(station.toLowerCase())) return false;
     }
 
     if (date) {
-      if (!dateFns.isEqual(date.setHours(0,0,0,0), new Date(datetime))) return false;
+      if (!dateFns.isEqual(date.setHours(0, 0, 0, 0), new Date(datetime))) return false;
     }
 
     return true;
@@ -65,42 +65,34 @@ const Details = ({ weather }) => {
     return !!station || !!date;
   };
 
-  const getFilteredWeather = () => {
-    return weather.filter(filterWeather);
-  };
+  const getFilteredWeather = () => weather.filter(filterWeather);
 
   const handleSelectChange = (e) => {
     const { name, value } = e.target;
 
-    setFilters(prevState => {
-      return {
-        ...prevState,
-        [name]: value
-      }
-    })
+    setFilters((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
   };
 
   const handleDateSelect = (value) => {
-    setFilters(prevState => {
-      return {
-        ...prevState,
-        date: value
-      }
-    })
+    setFilters((prevState) => ({
+      ...prevState,
+      date: value,
+    }));
   };
 
   const handleClearSearch = () => {
-    setFilters(prevState => {
-      return {
-        ...prevState,
-        station: ''
-      }
-    })
+    setFilters((prevState) => ({
+      ...prevState,
+      station: '',
+    }));
   };
 
-  const paginate = (item, index) => {
-    return index > (page - 1) * itemsPerPage && index < page * itemsPerPage
-  };
+  const paginate = (item, index) => (
+    index > (page - 1) * itemsPerPage && index < page * itemsPerPage
+  );
 
   const getDataToDisplay = () => {
     if (isFilterSet()) return getFilteredWeather();
@@ -133,11 +125,15 @@ const Details = ({ weather }) => {
                 showLastButton
               />
             </div>
-          )
-        }
+          )}
       </Paper>
     </Container>
-  )
+  );
+};
+
+Details.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
+  weather: PropTypes.array.isRequired,
 };
 
 export default Details;

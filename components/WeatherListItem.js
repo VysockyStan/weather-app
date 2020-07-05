@@ -17,8 +17,8 @@ const useStyles = makeStyles(() => ({
     flexShrink: 0,
   },
   details: {
-    backgroundColor: '#f8f8ff'
-  }
+    backgroundColor: '#f8f8ff',
+  },
 }));
 
 const DetailItem = ({ caption, value }) => {
@@ -29,14 +29,21 @@ const DetailItem = ({ caption, value }) => {
       <div><Typography variant="caption">{caption}</Typography></div>
       <div><Typography variant="subtitle2">{value}</Typography></div>
     </div>
-  )
+  );
 };
 
-const WeatherListItem = ({ details, expanded, handleExpandChange, getFormattedDate, getFormattedTemperature }) => {
+DetailItem.propTypes = {
+  caption: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired,
+};
+
+const WeatherListItem = ({
+  details, expanded, handleExpandChange, getFormattedDate, getFormattedTemperature,
+}) => {
   const {
     id, place_name: placeName, datetime, latitude, longitude,
     temperature_max: tempMax, temperature_min: tempMin,
-    precipitation_probability: precipProb, precipitation_mm: precipMm
+    precipitation_probability: precipProb, precipitation_mm: precipMm,
   } = details;
   const classes = useStyles();
 
@@ -45,7 +52,9 @@ const WeatherListItem = ({ details, expanded, handleExpandChange, getFormattedDa
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Typography className={classes.heading}>{placeName}</Typography>
         <Typography className={classes.heading}>{getFormattedDate(datetime)}</Typography>
-        <Typography className={classes.heading}>{getFormattedTemperature(tempMin, tempMax)}</Typography>
+        <Typography className={classes.heading}>
+          {getFormattedTemperature(tempMin, tempMax)}
+        </Typography>
       </AccordionSummary>
       <AccordionDetails className={classes.details}>
         <DetailItem caption="Latitude" value={latitude} />
@@ -58,13 +67,15 @@ const WeatherListItem = ({ details, expanded, handleExpandChange, getFormattedDa
 };
 
 WeatherListItem.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
   details: PropTypes.object.isRequired,
   expanded: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.string,
   ]).isRequired,
   handleExpandChange: PropTypes.func.isRequired,
-  getFormattedDate: PropTypes.func.isRequired
+  getFormattedDate: PropTypes.func.isRequired,
+  getFormattedTemperature: PropTypes.func.isRequired,
 };
 
 export default WeatherListItem;

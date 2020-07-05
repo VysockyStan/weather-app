@@ -18,16 +18,18 @@ const useStyles = makeStyles((theme) => ({
     zIndex: 1,
     backgroundColor: '#fff',
     padding: theme.spacing(3),
-    margin: '0 -24px'
+    margin: '0 -24px',
   },
   filters: {
     display: 'flex',
     alignItems: 'flex-end',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
 }));
 
-const WeatherListHeader = ({ filters, handleSelectChange, handleClearSearch, handleDateSelect }) => {
+const WeatherListHeader = ({
+  filters, handleSelectChange, handleClearSearch, handleDateSelect,
+}) => {
   const classes = useStyles();
   const { station, date } = filters;
 
@@ -46,18 +48,18 @@ const WeatherListHeader = ({ filters, handleSelectChange, handleClearSearch, han
             type="text"
             value={station}
             onChange={handleSelectChange}
-            startAdornment={
+            startAdornment={(
               <InputAdornment position="start">
                 <SearchIcon />
               </InputAdornment>
-            }
-            endAdornment={
+            )}
+            endAdornment={(
               <InputAdornment position="end">
                 <IconButton onClick={handleClearSearch}>
                   <HighlightOffIcon />
                 </IconButton>
               </InputAdornment>
-            }
+            )}
           />
         </FormControl>
         <DatePicker handleDateChange={handleDateSelect} selectedDate={date} />
@@ -67,6 +69,7 @@ const WeatherListHeader = ({ filters, handleSelectChange, handleClearSearch, han
 };
 
 WeatherListHeader.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
   filters: PropTypes.object.isRequired,
   handleSelectChange: PropTypes.func.isRequired,
   handleClearSearch: PropTypes.func.isRequired,
